@@ -1,46 +1,55 @@
-const {Schema, model} = require('mongoose');
+const { Schema, model } = require('mongoose');
 const moment = require('moment');
 
+// pseudocode
+//    name of pizza
+//    name of user who created pizza
+//    timestamp of creation
+//    timestamp of updates
+//    pizza's suggested size
+//    pizza's toppings
 
-const PizzaSchema = new Schema({
-    pizzaName: {
-        type: String
-    },
-    createdBy : {
-        type: String
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-        get: (createdAtVal) => moment(createdAtVal).format('mmm dd,yyyy [at] hh:mm a')
-    },
-    size: {
-        type: String,
-        default: 'Large'
-    },
-    toppings:[],
-    comments: [{
-        type: Schema.Types.ObjectId,
-        ref: 'Comment'
-    }]
-
-},
-{
-    toJSON: {
-        virtuals: true,
-        getters: true
-    },
-    id: false
-}
+const PizzaSchema = new Schema(
+   {
+      pizzaName: {
+         type: String
+      },
+      createdBy: {
+         type: String
+      },
+      createdAt: {
+         type: Date,
+         default: Date.now,
+         get: (createdAtVal) => moment(createdAtVal).format('MMM DD, YYYY [at] hh:mm a')
+      },
+      size: {
+         type: String,
+         default: 'Large'
+      },
+      toppings: [],
+      comments: [
+         {
+            type: Schema.Types.ObjectId,
+            ref: 'Comment'
+         }
+      ]
+   },
+   {
+      toJSON: {
+         virtuals: true,
+         getters: true
+      }, 
+      id: false 
+   }
 );
+
 // get total count of comments and replies on retrieval
 PizzaSchema.virtual('commentCount').get(function() {
-    return this.comments.length;
-  });
+   return this.comments.reduce((total, comment) => total + comment.replies.length + 1, 0);
+});
 
-
-//create using the preceading schema
+// create the Pizza model using the PizzaSchema
 const Pizza = model('Pizza', PizzaSchema);
 
-//export model
+// export the Pizza model
 module.exports = Pizza;
